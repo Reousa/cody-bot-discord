@@ -29,8 +29,15 @@ namespace CodyBot
 			var client = new DiscordSocketClient();
 			await client.LoginAsync(TokenType.Bot, ReadToken());
 			await client.StartAsync();
+			client.Log += Log;
 
 			await Task.Delay(-1);
+		}
+
+		private Task Log(LogMessage arg)
+		{
+			Console.WriteLine(arg.Message);
+			return Task.CompletedTask;
 		}
 	}
 }
