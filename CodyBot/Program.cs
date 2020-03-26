@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using CodyBot.Discord;
+using Discord.Commands;
 
 namespace CodyBot
 {
@@ -31,6 +32,10 @@ namespace CodyBot
 			await client.StartAsync();
 			client.Log += Log;
 
+			CommandHandler commandHandler = new CommandHandler(client, new CommandService());
+			await commandHandler.InstallCommandsAsync();
+
+			// Block this task until the program is closed.
 			await Task.Delay(-1);
 		}
 
