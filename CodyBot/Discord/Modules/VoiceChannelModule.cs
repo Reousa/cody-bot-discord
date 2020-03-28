@@ -30,12 +30,17 @@ namespace CodyBot.Discord.Modules
         //-------------------------------------------------------------------------------------------------------------------------
         //-------------------------------------------------------------------------------------------------------------------------
 
+
+
+
+        public int max = 1;
         // ~marmt -> Auther gets moved to all the empty voice channels and then gets moved back to his orignal channel
         // ~marmt @kareemsarhan  -> metioned user gets moved to all the empty voice channels and then gets moved back to his orignal channel
+        // ~marmt @kareemsarhan 3  -> metioned user gets moved to all the empty voice channels for 3 times and then gets moved back to his orignal channel
         [Command("move")]
-        [Alias("marmt", "bhdl")]
+        [Alias("marmt", "bhdl", "marmat", "mrmt","bahdl","bahdel","mrmat")]
         [Summary("moves the user around.")]
-        public async Task moveAsync([Summary("moves the user around.")] IGuildUser user = null , int count=3)
+        public async Task moveAsync([Summary("moves the user around.")] IGuildUser user = null, int count = 3)
         {
             // Get the user
             user = user as IGuildUser ?? Context.User as IGuildUser;
@@ -45,8 +50,8 @@ namespace CodyBot.Discord.Modules
             {
                 await Context.Channel.SendMessageAsync("The user that you want to move must be in a voice channel");
             }
-            if (count > 3)  
-                count = 3;
+            if (count > max)  
+                count = max;
             IGuild guild = Context.Guild;
             IReadOnlyCollection<IVoiceChannel> guildchannels = await guild.GetVoiceChannelsAsync();
             //TODO: check this the problem in this link is happining here , cant get the solution to work 
@@ -63,13 +68,15 @@ namespace CodyBot.Discord.Modules
                             x.Channel = Optional.Create(channel);
                         });
                 }
-                Console.WriteLine(count-i+"times left");
+                await Context.Channel.SendMessageAsync(count - i + "times left");
+                Console.WriteLine(count-i+" times left");
             }
             //TODO: efhm how to convert from lamda exp to normal
             await user.ModifyAsync(x =>
             {
                 x.Channel = Optional.Create(orignalchannel);
             });
+            await Context.Channel.SendMessageAsync("done");
             Console.WriteLine("done");
             return;
         }
