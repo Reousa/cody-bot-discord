@@ -8,12 +8,15 @@ using RunMode = Discord.Commands.RunMode;
 
 namespace CodyBot.Discord.Modules
 {
-    // Create a module with no prefix
     public class VoiceChannelModule : ModuleBase<SocketCommandContext>
     {
-        // ~come -> Joins your current room
-        // ~come room2  -> Joins room2
-        [Command("come")]
+		public int MaxMarmatLoops = 6;
+
+		/// <summary>
+		/// !come -> Joins your current room
+		/// !come room2  -> Joins room2
+		/// </summary>
+		[Command("come")]
         [Alias("join", "t3ala")]
         [Summary("Join author's current voice channel.")]
         public async Task ComeAsync( [Summary("Joins author's current voice channel or the specified channel .")] IVoiceChannel channel = null)
@@ -27,57 +30,50 @@ namespace CodyBot.Discord.Modules
             return;
         }
 
-        //-------------------------------------------------------------------------------------------------------------------------
-        //-------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-        public int max = 1;
-        // ~marmt -> Auther gets moved to all the empty voice channels and then gets moved back to his orignal channel
-        // ~marmt @kareemsarhan  -> metioned user gets moved to all the empty voice channels and then gets moved back to his orignal channel
-        // ~marmt @kareemsarhan 3  -> metioned user gets moved to all the empty voice channels for 3 times and then gets moved back to his orignal channel
-        [Command("move")]
+        /// <summary>
+        /// !marmt -> Author gets moved to all the empty voice channels and then gets moved back to his orignal channel
+        /// !marmt @kareemsarhan -> metioned user gets moved to all the empty voice channels and then gets moved back to his orignal channel
+        /// !marmt @kareemsarhan 3 -> metioned user gets moved to all the empty voice channels for 3 times and then gets moved back to his orignal channel
+        /// </summary>
+        [Command("move", RunMode = RunMode.Async)]
         [Alias("marmt", "bhdl", "marmat", "mrmt","bahdl","bahdel","mrmat")]
-        [Summary("moves the user around.")]
-        public async Task moveAsync([Summary("moves the user around.")] IGuildUser user = null, int count = 3)
+        [Summary("metioned user gets moved to all the empty voice channels and then gets moved back to his orignal channel.")]
+        public async Task moveAsync([Summary("moves the user around.")] IGuildUser user = null, int count = 1)
         {
+			Console.WriteLine($"User {Context.User.Username} requested to marmat {user.Nickname ?? user.Username} {count} times.");
             // Get the user
-            user = user as IGuildUser ?? Context.User as IGuildUser;
+            user = user ?? Context.User as IGuildUser;
             // Get the audio channel
-            IVoiceChannel orignalchannel = user.VoiceChannel;
-            if (orignalchannel == null)
+            IVoiceChannel originalChannel = user.VoiceChannel;
+            if (originalChannel == null)
             {
-                await Context.Channel.SendMessageAsync("The user that you want to move must be in a voice channel");
+                await Context.Channel.SendMessageAsync("The user that you want to marmat must be in a voice channel");
+				return;
             }
-            if (count > max)  
-                count = max;
+
+			count = count > MaxMarmatLoops ? MaxMarmatLoops : count;
             IGuild guild = Context.Guild;
-            IReadOnlyCollection<IVoiceChannel> guildchannels = await guild.GetVoiceChannelsAsync();
-            //TODO: check this the problem in this link is happining here , cant get the solution to work 
-            //https://discord.foxbot.me/docs/faq/commands/general.html?tabs=cmdattrib
-            //its not an error it just slowes down the execution
-            for (int i = 0; count > i; i++)
+            var guildChannels = await guild.GetVoiceChannelsAsync();
+
+            for (int i = count; i > 0; i--)
             {
-                foreach (IVoiceChannel channel in guildchannels)
+				await Context.Channel.SendMessageAsync($"Marmating {user.Nickname} {i} more times.");
+				Console.WriteLine($"Marmating {user.Nickname} {i} more times.");
+
+				foreach (IVoiceChannel channel in guildChannels)
                 {
-                    //TODO: mesh 3arf a al voice channel current members 3shan a check hya empty wla l2
-                    if (channel != orignalchannel)
-                        await user.ModifyAsync(x =>
-                        {
-                            x.Channel = Optional.Create(channel);
-                        });
+					if(channel != originalChannel)
+                    await user.ModifyAsync(x =>
+                    {
+                        x.Channel = Optional.Create(channel);
+                    });
                 }
-                await Context.Channel.SendMessageAsync(count - i + "times left");
-                Console.WriteLine(count-i+" times left");
             }
-            //TODO: efhm how to convert from lamda exp to normal
+
             await user.ModifyAsync(x =>
             {
-                x.Channel = Optional.Create(orignalchannel);
+                x.Channel = Optional.Create(originalChannel);
             });
-            await Context.Channel.SendMessageAsync("done");
-            Console.WriteLine("done");
             return;
         }
     }
