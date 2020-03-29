@@ -11,8 +11,8 @@ namespace CodyBot.Discord.Modules
     // Create a module with no prefix
     public class VoiceChannelModule : ModuleBase<SocketCommandContext>
     {
-        // ~come -> Joins your current room
-        // ~come room2  -> Joins room2
+        // !come -> Joins your current room
+        // !come room2  -> Joins room2
         [Command("come")]
         [Alias("join", "t3ala")]
         [Summary("Join author's current voice channel.")]
@@ -26,22 +26,17 @@ namespace CodyBot.Discord.Modules
             }
             return;
         }
-
-        //-------------------------------------------------------------------------------------------------------------------------
-        //-------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-        public int max = 1;
-        // ~marmt -> Auther gets moved to all the empty voice channels and then gets moved back to his orignal channel
-        // ~marmt @kareemsarhan  -> metioned user gets moved to all the empty voice channels and then gets moved back to his orignal channel
-        // ~marmt @kareemsarhan 3  -> metioned user gets moved to all the empty voice channels for 3 times and then gets moved back to his orignal channel
+        /// <summary>
+        // !marmt -> Auther gets moved to all the empty voice channels and then gets moved back to his orignal channel
+        // !marmt @kareemsarhan  -> metioned user gets moved to all the empty voice channels and then gets moved back to his orignal channel
+        // !marmt @kareemsarhan 3  -> metioned user gets moved to all the empty voice channels for 3 times and then gets moved back to his orignal channel
+        /// </summary>
         [Command("move")]
         [Alias("marmt", "bhdl", "marmat", "mrmt","bahdl","bahdel","mrmat")]
-        [Summary("moves the user around.")]
+        [Summary("metioned user gets moved to all the empty voice channels and then gets moved back to his orignal channel.")]
         public async Task moveAsync([Summary("moves the user around.")] IGuildUser user = null, int count = 3)
         {
+            int max = 1;
             // Get the user
             user = user as IGuildUser ?? Context.User as IGuildUser;
             // Get the audio channel
@@ -54,14 +49,10 @@ namespace CodyBot.Discord.Modules
                 count = max;
             IGuild guild = Context.Guild;
             IReadOnlyCollection<IVoiceChannel> guildchannels = await guild.GetVoiceChannelsAsync();
-            //TODO: check this the problem in this link is happining here , cant get the solution to work 
-            //https://discord.foxbot.me/docs/faq/commands/general.html?tabs=cmdattrib
-            //its not an error it just slowes down the execution
             for (int i = 0; count > i; i++)
             {
                 foreach (IVoiceChannel channel in guildchannels)
                 {
-                    //TODO: mesh 3arf a al voice channel current members 3shan a check hya empty wla l2
                     if (channel != orignalchannel)
                         await user.ModifyAsync(x =>
                         {
@@ -71,7 +62,6 @@ namespace CodyBot.Discord.Modules
                 await Context.Channel.SendMessageAsync(count - i + "times left");
                 Console.WriteLine(count-i+" times left");
             }
-            //TODO: efhm how to convert from lamda exp to normal
             await user.ModifyAsync(x =>
             {
                 x.Channel = Optional.Create(orignalchannel);
