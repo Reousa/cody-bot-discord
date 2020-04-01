@@ -1,80 +1,66 @@
-﻿using Discord.Commands;
+﻿using CodyBot.Discord.Modules.Whatsapp;
+using Discord;
+using Discord.Commands;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace CodyBot.Discord.Modules
 {
     public class WhatsappModule : ModuleBase<SocketCommandContext>
     {
-        public static WhatsappConv ParseMessages(string completeText)
-        {
-            //parse each message, add it to the array, return the array
-            String[] spearator = { "[", "] ", ": " };
-            List<String> splitText = new List<string>(completeText.Split(spearator, StringSplitOptions.None));
-            int nSize = 3;
-            var list = new List<List<String>>();
-            //Console.WriteLine(completeText);
-            //for (int i = 0; i < splitText.Count; i += 1)
-            //{
-            //    Console.WriteLine(splitText[i]);
-            //}
-            for (int i = 1; i < splitText.Count; i += nSize)
-            {
-                list.Add(splitText.GetRange(i, Math.Min(nSize, splitText.Count - i)));
-            }
-            List<WhatsappMessage> whatsappMessages = new List<WhatsappMessage>();
-            foreach (List<String> sublist in list)
-            {
-                if (sublist.Count == 3)
-                {
-                    WhatsappMessage whatsappMessage = new WhatsappMessage(sublist[0], sublist[1], sublist[2]);
-                    whatsappMessages.Add(whatsappMessage);
-                    //Console.WriteLine(sublist[0]+""+ sublist[1] + "" + sublist[2]);
-                }
-            }
-            WhatsappConv conv = new WhatsappConv(whatsappMessages);
-            return conv;
-        }
-
-        //static void Main(string[] args)
-        //{
-        //    string op = ParseMessages("[4 / 1, 12:50 AM] Karim: Sar7aaaaaan[4 / 1, 12:50 AM] Karim: Hi[4 / 1, 12:50 AM] Karim: Eb3atly 7aha").ToString();
-        //    Console.WriteLine(op);
-        //}
-        // Create a module with no prefix
-
-        // ~say hello world -> hello world
         [Command("convsim")]
         [Alias("conv", "sim", "simconv")]
-        [Summary("Simulates a conv.")]
-        public async Task ConvSimAsync([Remainder] [Summary("Simulates a conv.")] string echo)
+        [Summary("Simulates a whatsapp conv.")]
+        public async Task WhatsappConvSimAsync([Remainder] [Summary("Simulates a whatsapp conv.")] string messages)
         {
-            var guild = Context.Guild;
-            var user = guild.GetUser(Context.Client.CurrentUser.Id);
-            WhatsappConv conv = ParseMessages(echo);
-            foreach (WhatsappMessage mes in conv.Messages) 
-            {
-                await user.ModifyAsync(x =>
-                {
-                    x.Nickname = mes.SenderName;
-                });
-                await ReplyAsync(mes.MessageContent );
-                //+ "SENT AT: " + mes.Date
-            }
+			var embed = await ConvertWhatsappConvToEmbed( ParseWhatsappConversation(messages));
+			await ReplyAsync(embed: embed);
+		}
 
-        }
+		private async Task<Embed> ConvertWhatsappConvToEmbed(WhatsappConversation conv)
+		{
+			var messages = conv.Messages;
+			var eb = new EmbedBuilder
+			{
+				Title = "Whatsapp Conversation",
+			};
+			for (int i = 0; i < messages.Length; i++)
+			{
+				var msg = messages[i];
+				eb.WithColor(Color.Blue)
+					.AddField($"**{msg.Date}: {msg.Author}**", $"{msg.Message}");
+			}
+			var embed = eb.Build();
+			return embed;
+		}
+
+		private WhatsappConversation ParseWhatsappConversation(string conversation )
+		{
+			var sr = new StringReader(conversation);
+			var messages = new List<WhatsappMessage>();
+
+			while(true)
+			{
+				var line = sr.ReadLine();
+				if (!string.IsNullOrEmpty(line))
+					messages.Add(ParseWhatsappMessage(line));
+				else
+					break;
+			}
+			return new WhatsappConversation(messages.ToArray());
+		}
+
+		private WhatsappMessage ParseWhatsappMessage(string line)
+		{
+			var first = line.Split("]");
+			var date = first[0].Remove(0, 1);
+			var second = first[1].Split(": ");
+			var author = second[0];
+			var message = second[1];
+
+			return new WhatsappMessage(message, date, author);
+		}
     }
 }
-/*
-[4 / 1, 12:50 AM] Karim: Sar7aaaaaan
-[4 / 1, 12:50 AM] Karim: Hi
-[4 / 1, 12:50 AM] Karim: Eb3atly 7aha
-[4 / 1, 12:50 AM] Karim: 7aga*
-[4 / 1, 12:51 AM] Karim Sar7an: asd
-[4 / 1, 12:51 AM] Karim Sar7an: dsa
-[4 / 1, 12:51 AM] Karim Sar7an: sad
-[4 / 1, 12:51 AM] Karim Sar7an: dsa
-[4 / 1, 12:51 AM] Karim Sar7an: a
-[4 / 1, 12:51 AM] Karim: Shmshm
-*/
