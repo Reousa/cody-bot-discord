@@ -1,6 +1,7 @@
 ﻿using Discord.Commands;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace CodyBot.Discord.Modules
 {
@@ -9,8 +10,8 @@ namespace CodyBot.Discord.Modules
         public static WhatsappConv ParseMessages(string completeText)
         {
             //parse each message, add it to the array, return the array
-            String[] spearator = { "[", "] " ,": "};
-            List<String> splitText = new List<string>(completeText.Split(spearator, StringSplitOptions.None)); 
+            String[] spearator = { "[", "] ", ": " };
+            List<String> splitText = new List<string>(completeText.Split(spearator, StringSplitOptions.None));
             int nSize = 3;
             var list = new List<List<String>>();
             //Console.WriteLine(completeText);
@@ -30,18 +31,39 @@ namespace CodyBot.Discord.Modules
                     WhatsappMessage whatsappMessage = new WhatsappMessage(sublist[0], sublist[1], sublist[2]);
                     whatsappMessages.Add(whatsappMessage);
                     //Console.WriteLine(sublist[0]+""+ sublist[1] + "" + sublist[2]);
-
                 }
-
             }
             WhatsappConv conv = new WhatsappConv(whatsappMessages);
             return conv;
         }
+
         //static void Main(string[] args)
         //{
         //    string op = ParseMessages("[4 / 1, 12:50 AM] Karim: Sar7aaaaaan[4 / 1, 12:50 AM] Karim: Hi[4 / 1, 12:50 AM] Karim: Eb3atly 7aha").ToString();
         //    Console.WriteLine(op);
         //}
+        // Create a module with no prefix
+
+        // ~say hello world -> hello world
+        [Command("convsim")]
+        [Alias("conv", "sim", "simconv")]
+        [Summary("Simulates a conv.")]
+        public async Task ConvSimAsync([Remainder] [Summary("Simulates a conv.")] string echo)
+        {
+            var guild = Context.Guild;
+            var user = guild.GetUser(Context.Client.CurrentUser.Id);
+            WhatsappConv conv = ParseMessages(echo);
+            foreach (WhatsappMessage mes in conv.Messages) 
+            {
+                await user.ModifyAsync(x =>
+                {
+                    x.Nickname = mes.SenderName;
+                });
+                await ReplyAsync(mes.MessageContent );
+                //+ "SENT AT: " + mes.Date
+            }
+
+        }
     }
 }
 /*
@@ -55,4 +77,4 @@ namespace CodyBot.Discord.Modules
 [4 / 1, 12:51 AM] Karim Sar7an: dsa
 [4 / 1, 12:51 AM] Karim Sar7an: a
 [4 / 1, 12:51 AM] Karim: Shmshm
-*/;
+*/
