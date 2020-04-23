@@ -3,6 +3,7 @@ using Discord.Commands;
 using System;
 using System.Collections.Generic;
 using System.Text;
+
 using System.Threading.Tasks;
 using RunMode = Discord.Commands.RunMode;
 
@@ -10,16 +11,17 @@ namespace CodyBot.Discord.Modules
 {
     public class VoiceChannelModule : ModuleBase<SocketCommandContext>
     {
-		public int MaxMarmatLoops = 6;
 
-		/// <summary>
-		/// !come -> Joins your current room
-		/// !come room2  -> Joins room2
-		/// </summary>
-		[Command("come")]
+        public int MaxMarmatLoops = 6;
+
+        /// <summary>
+        /// !come -> Joins your current room
+        /// !come room2  -> Joins room2
+        /// </summary>
+        [Command("come")]
         [Alias("join", "t3ala")]
         [Summary("Join author's current voice channel.")]
-        public async Task ComeAsync( [Summary("Joins author's current voice channel or the specified channel .")] IVoiceChannel channel = null)
+        public async Task ComeAsync([Summary("Joins author's current voice channel or the specified channel .")] IVoiceChannel channel = null)
         {
             // Get the audio channel
             channel = channel ?? (Context.User as IGuildUser)?.VoiceChannel;
@@ -41,6 +43,7 @@ namespace CodyBot.Discord.Modules
         public async Task moveAsync([Summary("moves the user around.")] IGuildUser user = null, int count = 1)
         {
 			Console.WriteLine($"User {Context.User.Username} requested to marmat {user.Nickname ?? user.Username} {count} times.");
+
             // Get the user
             user = user ?? Context.User as IGuildUser;
             // Get the audio channel
@@ -52,21 +55,23 @@ namespace CodyBot.Discord.Modules
             }
 
 			count = count > MaxMarmatLoops ? MaxMarmatLoops : count;
+
             IGuild guild = Context.Guild;
             var guildChannels = await guild.GetVoiceChannelsAsync();
 
             for (int i = count; i > 0; i--)
             {
-				await Context.Channel.SendMessageAsync($"Marmating {user.Nickname} {i} more times.");
-				Console.WriteLine($"Marmating {user.Nickname} {i} more times.");
 
-				foreach (IVoiceChannel channel in guildChannels)
+                await Context.Channel.SendMessageAsync($"Marmating {user.Nickname} {i} more times.");
+                Console.WriteLine($"Marmating {user.Nickname} {i} more times.");
+
+                foreach (IVoiceChannel channel in guildChannels)
                 {
-					if(channel != originalChannel)
-                    await user.ModifyAsync(x =>
-                    {
-                        x.Channel = Optional.Create(channel);
-                    });
+                    if (channel != originalChannel)
+                        await user.ModifyAsync(x =>
+                        {
+                            x.Channel = Optional.Create(channel);
+                        });
                 }
             }
 
