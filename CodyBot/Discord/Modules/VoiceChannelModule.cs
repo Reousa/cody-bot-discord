@@ -29,6 +29,8 @@ namespace CodyBot.Discord.Modules
             {
                 await Context.Channel.SendMessageAsync("Author must be in a voice channel, or a voice channel must be passed as an argument.");
             }
+            else
+                await channel.ConnectAsync();
             return;
         }
 
