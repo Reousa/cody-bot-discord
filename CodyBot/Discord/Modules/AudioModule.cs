@@ -9,7 +9,7 @@ using RunMode = Discord.Commands.RunMode;
 
 namespace CodyBot.Discord.Modules
 {
-    public class VoiceChannelModule : ModuleBase<SocketCommandContext>
+    public class AudioModule : ModuleBase<SocketCommandContext>
     {
 
         public int MaxMarmatLoops = 6;
@@ -21,7 +21,7 @@ namespace CodyBot.Discord.Modules
         [Command("come")]
         [Alias("join", "t3ala")]
         [Summary("Join author's current voice channel.")]
-        public async Task ComeAsync([Summary("Joins author's current voice channel or the specified channel .")] IVoiceChannel channel = null)
+        public async Task ComeAsync(IVoiceChannel channel = null)
         {
             // Get the audio channel
             channel = channel ?? (Context.User as IGuildUser)?.VoiceChannel;
@@ -40,11 +40,11 @@ namespace CodyBot.Discord.Modules
         /// !marmt @kareemsarhan 3 -> metioned user gets moved to all the empty voice channels for 3 times and then gets moved back to his orignal channel
         /// </summary>
         [Command("move", RunMode = RunMode.Async)]
-        [Alias("marmt", "bhdl", "marmat", "mrmt","bahdl","bahdel","mrmat")]
+        [Alias("marmt", "bhdl", "marmat", "mrmt", "bahdl", "bahdel", "mrmat")]
         [Summary("metioned user gets moved to all the empty voice channels and then gets moved back to his orignal channel.")]
-        public async Task moveAsync([Summary("moves the user around.")] IGuildUser user = null, int count = 1)
+        public async Task moveAsync(IGuildUser user = null, int count = 1)
         {
-			Console.WriteLine($"User {Context.User.Username} requested to marmat {user.Nickname ?? user.Username} {count} times.");
+            Console.WriteLine($"User {Context.User.Username} requested to marmat {user.Nickname ?? user.Username} {count} times.");
 
             // Get the user
             user = user ?? Context.User as IGuildUser;
@@ -53,10 +53,10 @@ namespace CodyBot.Discord.Modules
             if (originalChannel == null)
             {
                 await Context.Channel.SendMessageAsync("The user that you want to marmat must be in a voice channel");
-				return;
+                return;
             }
 
-			count = count > MaxMarmatLoops ? MaxMarmatLoops : count;
+            count = count > MaxMarmatLoops ? MaxMarmatLoops : count;
 
             IGuild guild = Context.Guild;
             var guildChannels = await guild.GetVoiceChannelsAsync();
@@ -82,6 +82,16 @@ namespace CodyBot.Discord.Modules
                 x.Channel = Optional.Create(originalChannel);
             });
             return;
+        }
+
+        /// <summary>
+        /// !play https://www.youtube.com/watch?v=qpZrFl9v9oM -> Joins your current room & play the audio from this youtube video.
+        /// </summary>
+        [Command("play")]
+        [Alias("P", "p")]
+        [Summary("Joins your current room & play the audio from this youtube video.")]
+        public async Task PlayAsync(IVoiceChannel channel = null)
+        {
         }
     }
 }
