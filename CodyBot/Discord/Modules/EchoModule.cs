@@ -16,5 +16,15 @@ namespace CodyBot.Discord.Modules
 		{
 			return ReplyAsync(echo);
 		}
+		// ~say hello world -> hello world
+		[Command("prefix")]
+		[Summary("Echoes a message back to the user.")]
+		public Task PrefixAsync([Remainder] [Summary("The text to echo")] char echo)
+		{
+			Console.WriteLine("ana henaaa");
+			ulong guildid = Context.Guild.Id;
+			CommandHandler.Writer(guildid, echo);
+			return ReplyAsync("now prefix is "+echo+" done");
+		}
 	}
 }
